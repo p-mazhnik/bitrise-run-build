@@ -10,7 +10,6 @@ export function createBuildOptions(): BuildOptions {
   const workflow = core.getInput('bitrise-workflow', { required: true })
 
   core.info(`Process "${github.context.eventName}" event`)
-  core.info(JSON.stringify(github.context))
 
   let options: Record<string, any>
   const environments: BitriseEnvironment[] = prepareEnvironmentVariables()
@@ -40,8 +39,9 @@ export function createBuildOptions(): BuildOptions {
       break
     }
   }
-  const skipGitStatusReport =
-    core.getInput('skip-git-status-report', { required: false }) === 'true'
+  const skipGitStatusReport = core.getBooleanInput('skip-git-status-report', {
+    required: false
+  })
 
   return {
     ...options,

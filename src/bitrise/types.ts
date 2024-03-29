@@ -107,3 +107,14 @@ export interface BitriseEnvironment {
   value: string
   is_expand: boolean
 }
+
+export interface BuildLogResponse {
+  is_archived: boolean
+  expiring_raw_log_url?: string
+  log_chunks: {
+    chunk: string
+    position: number
+  }[]
+  next_before_timestamp: string
+  next_after_timestamp: string
+}

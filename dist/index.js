@@ -36949,7 +36949,6 @@ const github = __importStar(__nccwpck_require__(5438));
 function createBuildOptions() {
     const workflow = core.getInput('bitrise-workflow', { required: true });
     core.info(`Process "${github.context.eventName}" event`);
-    core.info(JSON.stringify(github.context));
     let options;
     const environments = prepareEnvironmentVariables();
     if (github.context.payload?.pull_request) {
@@ -36977,7 +36976,9 @@ function createBuildOptions() {
             break;
         }
     }
-    const skipGitStatusReport = core.getInput('skip-git-status-report', { required: false }) === 'true';
+    const skipGitStatusReport = core.getBooleanInput('skip-git-status-report', {
+        required: false
+    });
     return {
         ...options,
         workflow_id: workflow,
@@ -37137,6 +37138,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const client_1 = __nccwpck_require__(1722);
 const build_1 = __nccwpck_require__(4793);
 const options_1 = __nccwpck_require__(359);
+const listen_1 = __nccwpck_require__(1830);
 async function run() {
     const bitriseToken = core.getInput('bitrise-token', { required: true });
     const client = (0, client_1.createClient)({ token: bitriseToken });
@@ -37146,8 +37148,13 @@ async function run() {
     const actor = (0, options_1.getActorUsername)();
     try {
         const build = await (0, build_1.triggerBuild)(client, bitriseAppId, options, actor);
+        core.info(`Build URL: ${build.build_url}`);
         core.setOutput('bitrise-build-id', build.build_slug);
         core.setOutput('bitrise-build-url', build.build_url);
+        const shouldListen = core.getBooleanInput('listen', { required: false });
+        if (!shouldListen) {
+            return;
+        }
         const stopOnSignals = core
             .getInput('stop-on-signals', { required: false })
             .split(',')
@@ -37155,8 +37162,11 @@ async function run() {
             .filter(i => i !== '');
         // Set up signal handling to stop the build on cancellation
         setupSignalHandlers(client, bitriseAppId, build.build_slug, stopOnSignals);
+        const updateInterval = parseInt(core.getInput('update-interval', { required: false }), 10) * 1000;
         // Wait for the build to "complete"
-        // return waitForBuildEndTime(sdk, start.build, config)
+        await (0, listen_1.waitForBuildEndTime)(client, bitriseAppId, build.build_slug, {
+            updateInterval
+        });
     }
     catch (e) {
         core.setFailed(e);
@@ -37177,6 +37187,138 @@ function setupSignalHandlers(client, appSlug, buildSlug, signals) {
         });
     }
 }
+
+
+/***/ }),
+
+/***/ 1830:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.waitForBuildEndTime = void 0;
+const utils_1 = __nccwpck_require__(1314);
+const core = __importStar(__nccwpck_require__(2186));
+const build_1 = __nccwpck_require__(4793);
+const axios_1 = __nccwpck_require__(8757);
+const waitForBuildEndTime = async (client, appSlug, buildSlug, { updateInterval }) => {
+    core.info(`Waiting for build ${appSlug}/${buildSlug} output...`);
+    let count = 0;
+    let pollingLogs = true;
+    let buildInfo;
+    let lastPosition = 0;
+    const interval = updateInterval;
+    do {
+        if (interval > 0) {
+            await (0, utils_1.sleep)(interval);
+        }
+        buildInfo = await (0, build_1.describeBuild)(client, appSlug, buildSlug);
+        if (buildInfo.is_on_hold ||
+            !buildInfo.started_on_worker_at ||
+            !pollingLogs) {
+            // build is not started yet
+            // or need to skip logs polling
+            continue;
+        }
+        let response;
+        try {
+            response = await client.get(`/apps/${appSlug}/builds/${buildSlug}/log`);
+        }
+        catch (error) {
+            if (error instanceof axios_1.AxiosError && error.response) {
+                core.info(error.response.data?.message);
+                if (error.response.status === 404) {
+                    // We may have 404 error until build is started
+                    continue;
+                }
+            }
+            throw error;
+        }
+        ++count;
+        const logIsArchived = response.data.is_archived;
+        // If the log has already been archived then polling is no good. Just
+        // download and print the log data. This handles the case where the
+        // very first request finds an archived build
+        if (logIsArchived && count === 1) {
+            pollingLogs = false;
+            if (!response.data.expiring_raw_log_url) {
+                // logs are missing
+                continue;
+            }
+            const archiveResponse = await client.get(response.data.expiring_raw_log_url);
+            core.info(archiveResponse.data.trimEnd());
+            continue;
+        }
+        if (response.data.log_chunks.length) {
+            for (const { chunk, position } of response.data.log_chunks) {
+                // When requesting the logs by timestamps returned from previous
+                // requests, duplicate chunks are included in the response. Only
+                // log new chunks
+                if (position > lastPosition) {
+                    core.info(chunk.trimEnd());
+                    lastPosition = position;
+                }
+            }
+        }
+    } while (!buildInfo.finished_at);
+    if (buildInfo.status !== 1) {
+        core.setFailed(getStatusMessage(buildInfo.status));
+    }
+    else {
+        core.info(getStatusMessage(buildInfo.status));
+    }
+};
+exports.waitForBuildEndTime = waitForBuildEndTime;
+function getStatusMessage(status) {
+    switch (status) {
+        case 0:
+            return 'Build TIMED OUT';
+        case 1:
+            return 'Build Successful 🎉';
+        case 2:
+            return 'Build Failed 🚨';
+        case 3:
+            return 'Build Aborted 💥';
+    }
+    return 'Invalid build status 🤔';
+}
+
+
+/***/ }),
+
+/***/ 1314:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sleep = void 0;
+const sleep = async (delay) => new Promise(resolve => setTimeout(resolve, delay));
+exports.sleep = sleep;
 
 
 /***/ }),

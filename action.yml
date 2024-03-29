@@ -19,9 +19,18 @@ inputs:
   bitrise-workflow:
     description: "The name of the workflow you want to trigger"
     required: true
+  listen:
+    description: 'Set to `true` if you want to listen for the build logs and wait for build completion'
+    required: false
+    default: 'false'
+  update-interval:
+    description: 'How often the action calls the API for updates, seconds'
+    required: false
+    default: '15'
   skip-git-status-report:
     description: 'Set to `true` if you want do skip git status report'
     required: false
+    default: 'false'
   env-vars-for-bitrise:
     description: 'Comma separated list of environment variables to send to Bitrise'
     required: false
