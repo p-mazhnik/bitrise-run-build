@@ -7,15 +7,24 @@ author: 'p-mazhnik'
 #  color: 'red'
 
 inputs:
+  bitrise-token:
+    description: "User-generated personal access token or Workspace API token"
+    required: true
   bitrise-app-slug:
     description: "Bitrise App slug"
     required: true
   bitrise-build-trigger-token:
     description: "Bitrise Build trigger token"
-    required: true
+    required: false
   bitrise-workflow:
     description: "The name of the workflow you want to trigger"
     required: true
+  skip-git-status-report:
+    description: 'Set to `true` if you want do skip git status report'
+    required: false
+  env-vars-for-bitrise:
+    description: 'Comma separated list of environment variables to send to Bitrise'
+    required: false
   stop-on-signals:
     description: 'Comma separated list of process signals on which to stop the build. Default is SIGINT.'
     required: false

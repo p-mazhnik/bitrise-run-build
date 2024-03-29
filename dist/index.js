@@ -36831,11 +36831,11 @@ const describeBuild = async (client, appSlug, buildSlug) => {
     return response.data.data;
 };
 exports.describeBuild = describeBuild;
-const triggerBuild = async (client, appSlug, options) => {
+const triggerBuild = async (client, appSlug, options, actor) => {
     const buildOptions = {
         build_params: options,
         hook_info: { type: 'bitrise' },
-        triggered_by: 'actions-github' // todo: actions-github/${username}
+        triggered_by: `actions-github/${actor}`
     };
     const response = await client.post(`/apps/${appSlug}/builds`, buildOptions);
     return response.data;
@@ -36885,12 +36885,29 @@ const createClient = ({ token }) => {
     (0, assert_1.default)(token, 'A build token is required');
     const client = axios_1.default.create({
         baseURL: 'https://api.bitrise.io/v0.1',
-        headers: { 'Api-Token': token }
+        headers: { Authorization: token }
     });
     (0, axios_retry_1.default)(client, { retryDelay: axios_retry_1.exponentialDelay });
     return client;
 };
 exports.createClient = createClient;
+// export const buildTrigger = ({
+//   token,
+//   appSlug
+// }: {
+//   token: string
+//   appSlug: string
+// }): AxiosInstance => {
+//   assert(token, 'A build token is required')
+//
+//   const client = axios.create({
+//     baseURL: `https://app.bitrise.io/app/${appSlug}/build/start.json`,
+//     headers: { 'Api-Token': token }
+//   })
+//
+//   axiosRetry(client, { retryDelay: exponentialDelay })
+//   return client
+// }
 
 
 /***/ }),
@@ -36926,53 +36943,85 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createBuildOptions = void 0;
+exports.getActorUsername = exports.createBuildOptions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function createBuildOptions() {
     const workflow = core.getInput('bitrise-workflow', { required: true });
-    let options = {};
+    core.info(`Process "${github.context.eventName}" event`);
+    core.info(JSON.stringify(github.context));
+    let options;
+    const environments = prepareEnvironmentVariables();
+    if (github.context.payload?.pull_request) {
+        options = transformPullRequestEvent(github.context.payload.pull_request);
+        if (github.context.payload.pull_request.draft) {
+            environments.push({
+                mapped_to: 'GITHUB_PR_IS_DRAFT',
+                value: 'true',
+                is_expand: false
+            });
+        }
+    }
+    else {
+        if (!github.context.payload) {
+            core.setFailed('No payload found in the context.');
+        }
+        options = transformBasicEvent(github.context.payload);
+    }
     switch (github.context.eventName) {
         case 'pull_request': {
             if (!github.context.payload?.pull_request) {
-                throw new Error('No pull_request found in the payload.');
+                core.setFailed('No pull_request found in the payload.');
+                return {};
             }
-            options = transformPullRequestEvent(github.context.payload.pull_request);
             break;
-        }
-        case 'push': {
-            if (!github.context.payload) {
-                throw new Error('No payload found in the context.');
-            }
-            options = transformPushEvent(github.context.payload);
-            break;
-        }
-        default: {
-            throw new Error(`Event "${github.context.eventName}" is not supported.`);
         }
     }
+    const skipGitStatusReport = core.getInput('skip-git-status-report', { required: false }) === 'true';
     return {
         ...options,
         workflow_id: workflow,
-        skip_git_status_report: true // todo
+        skip_git_status_report: skipGitStatusReport,
+        environments
     };
 }
 exports.createBuildOptions = createBuildOptions;
-function transformPushEvent(payload) {
+function transformBasicEvent(payload) {
     if (payload.deleted) {
-        throw new Error("this is a 'Deleted' event, no build can be started");
+        core.setFailed("this is a 'Deleted' event, no build can be started");
+        return {};
     }
+    let options = {};
+    const commits = payload.commits ?? (payload.head_commit ? [payload.head_commit] : []);
+    const commitPaths = [];
+    const commitMessages = [];
     const ref = github.context.ref;
     if (ref.startsWith('refs/heads/')) {
-        return {
-            branch: ref.slice(11),
-            commit_hash: payload.head_commit.sha,
-            commit_message: payload.head_commit.message,
-            // todo: commit_paths
-            base_repository_url: getRepositoryURL(payload.repository)
+        for (const commit of commits) {
+            commitMessages.push(commit.message);
+            commitPaths.push({
+                added: commit.added,
+                removed: commit.removed,
+                modified: commit.modified
+            });
+        }
+        options = {
+            branch: ref.slice(11)
         };
     }
-    return {};
+    else if (ref.startsWith('refs/tags/')) {
+        options = {
+            tag: ref.slice(10)
+        };
+    }
+    return {
+        ...options,
+        commit_hash: github.context.sha,
+        commit_message: payload.head_commit?.message,
+        commit_messages: commitMessages,
+        commit_paths: commitPaths,
+        base_repository_url: getRepositoryURL(payload.repository)
+    };
 }
 function transformPullRequestEvent(pr) {
     const options = {};
@@ -36986,15 +37035,12 @@ function transformPullRequestEvent(pr) {
             options.pull_request_unverified_merge_branch;
     }
     if (mergeRefUpToDate && mergeable === false) {
-        // todo: throw error "pull Request is not mergeable"
+        core.setFailed('Pull Request is not mergeable');
+        return {};
     }
     let commitMsg = pr.title;
     if (pr.body) {
         commitMsg += `\n\n${pr.body}`;
-    }
-    if (pr.draft) {
-        // todo: add to envs
-        // GITHUB_PR_IS_DRAFT, IsExpand: false
     }
     return {
         ...options,
@@ -37010,7 +37056,8 @@ function transformPullRequestEvent(pr) {
         base_repository_url: getRepositoryURL(pr.base?.repo),
         pull_request_head_branch: `pull/${prNumber}/head`,
         pull_request_author: pr.user?.login,
-        diff_url: pr.diff_url
+        diff_url: pr.diff_url,
+        pull_request_ready_state: getPrReadyState(pr)
     };
 }
 function getRepositoryURL(repoInfoModel) {
@@ -37019,6 +37066,39 @@ function getRepositoryURL(repoInfoModel) {
     }
     return repoInfoModel?.clone_url;
 }
+function getPrReadyState(pr) {
+    if (pr.action === 'ready_for_review') {
+        return 'converted_to_ready_for_review';
+    }
+    if (pr.draft) {
+        return 'draft';
+    }
+    return 'ready_for_review';
+}
+function prepareEnvironmentVariables() {
+    const envPassThrough = core
+        .getInput('env-vars-for-bitrise', { required: false })
+        .split(',')
+        .map(i => i.trim())
+        .filter(i => i !== '');
+    return Object.entries(process.env)
+        .filter(([key]) => envPassThrough.includes(key))
+        .map(([mapped_to, value = '']) => ({
+        mapped_to,
+        value,
+        is_expand: false
+    }));
+}
+function getActorUsername() {
+    switch (github.context.eventName) {
+        case 'pull_request':
+            return github.context.payload.sender?.login ?? github.context.actor;
+        case 'push':
+            return github.context.payload.pusher?.name ?? github.context.actor;
+    }
+    return github.context.actor;
+}
+exports.getActorUsername = getActorUsername;
 
 
 /***/ }),
@@ -37058,23 +37138,29 @@ const client_1 = __nccwpck_require__(1722);
 const build_1 = __nccwpck_require__(4793);
 const options_1 = __nccwpck_require__(359);
 async function run() {
-    const bitriseBuildTriggerToken = core.getInput('bitrise-build-trigger-token', { required: true });
-    const client = (0, client_1.createClient)({ token: bitriseBuildTriggerToken });
+    const bitriseToken = core.getInput('bitrise-token', { required: true });
+    const client = (0, client_1.createClient)({ token: bitriseToken });
     const bitriseAppId = core.getInput('bitrise-app-slug', { required: true });
     // Start the build
     const options = (0, options_1.createBuildOptions)();
-    const build = await (0, build_1.triggerBuild)(client, bitriseAppId, options);
-    core.setOutput('bitrise-build-id', build.build_slug);
-    core.setOutput('bitrise-build-url', build.build_url);
-    const stopOnSignals = core
-        .getInput('stop-on-signals', { required: false })
-        .split(',')
-        .map(i => i.trim())
-        .filter(i => i !== '');
-    // Set up signal handling to stop the build on cancellation
-    // setupSignalHandlers(client, bitriseAppId, build.build_slug, stopOnSignals)
-    // Wait for the build to "complete"
-    // return waitForBuildEndTime(sdk, start.build, config)
+    const actor = (0, options_1.getActorUsername)();
+    try {
+        const build = await (0, build_1.triggerBuild)(client, bitriseAppId, options, actor);
+        core.setOutput('bitrise-build-id', build.build_slug);
+        core.setOutput('bitrise-build-url', build.build_url);
+        const stopOnSignals = core
+            .getInput('stop-on-signals', { required: false })
+            .split(',')
+            .map(i => i.trim())
+            .filter(i => i !== '');
+        // Set up signal handling to stop the build on cancellation
+        setupSignalHandlers(client, bitriseAppId, build.build_slug, stopOnSignals);
+        // Wait for the build to "complete"
+        // return waitForBuildEndTime(sdk, start.build, config)
+    }
+    catch (e) {
+        core.setFailed(e);
+    }
 }
 exports.run = run;
 function setupSignalHandlers(client, appSlug, buildSlug, signals) {
