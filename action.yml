@@ -1,0 +1,30 @@
+name: '"Bitrise run build" Action For GitHub Actions'
+description: 'Trigger Bitrise build for the current repo.'
+author: 'p-mazhnik'
+
+#branding:
+#  icon: 'heart'
+#  color: 'red'
+
+inputs:
+  bitrise-app-slug:
+    description: "Bitrise App slug"
+    required: true
+  bitrise-build-trigger-token:
+    description: "Bitrise Build trigger token"
+    required: true
+  bitrise-workflow:
+    description: "The name of the workflow you want to trigger"
+    required: true
+  stop-on-signals:
+    description: 'Comma separated list of process signals on which to stop the build. Default is SIGINT.'
+    required: false
+    default: 'SIGINT'
+outputs:
+  bitrise-build-id:
+    description: 'The Bitrise Build ID for this build.'
+  bitrise-build-url:
+    description: 'The Bitrise Build url for this build.'
+runs:
+  using: node20
+  main: dist/index.js
