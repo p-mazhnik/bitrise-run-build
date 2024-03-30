@@ -1,8 +1,6 @@
 {
-  "name": "@p-mazhnik/bitrise-run-build",
-  "description": "Trigger Bitrise build for the current repo.",
-  "version": "0.0.0",
-  "author": "",
+  "name": "bitrise-run-build",
+  "description": "Run Bitrise build as a step in GitHub Actions workflow.",
   "private": true,
   "homepage": "https://github.com/p-mazhnik/bitrise-run-build",
   "repository": {
@@ -12,6 +10,7 @@
   "bugs": {
     "url": "https://github.com/p-mazhnik/bitrise-run-build/issues"
   },
+  "main": "dist/index.js",
   "exports": {
     ".": "./dist/index.js"
   },
@@ -19,15 +18,15 @@
     "node": ">=20"
   },
   "scripts": {
-    "bundle": "npm run format:write && npm run package",
-    "ci-test": "npx jest",
-    "format:write": "npx prettier --write .",
-    "format:check": "npx prettier --check .",
-    "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
-    "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",
-    "package:watch": "npm run package -- --watch",
-    "test": "npx jest",
-    "all": "npm run format:write && npm run lint && npm run test && npm run package"
+    "bundle": "npm run format:write && npm run build",
+    "ci-test": "jest",
+    "format:write": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . -c ./.eslintrc.yml",
+    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "build:watch": "npm run build -- --watch",
+    "test": "jest",
+    "all": "npm run format:write && npm run lint && npm run test && npm run build"
   },
   "license": "MIT",
   "jest": {
@@ -69,7 +68,7 @@
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.0",
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.2",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
     "@vercel/ncc": "^0.38.1",
