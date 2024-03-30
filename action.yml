@@ -1,26 +1,30 @@
-name: '"Bitrise run build" Action For GitHub Actions'
-description: 'Trigger Bitrise build for the current repo.'
+name: 'Bitrise Build Runner'
+description: 'Run Bitrise build as a step in GitHub Actions workflow.'
 author: 'p-mazhnik'
 
-#branding:
-#  icon: 'heart'
-#  color: 'red'
+branding:
+  icon: 'server'
+  color: 'purple'
 
 inputs:
   bitrise-token:
-    description: "User-generated personal access token or Workspace API token"
+    description: 'User-generated personal access token or Workspace API token'
     required: false
   bitrise-app-slug:
-    description: "Bitrise App slug"
+    description: 'Bitrise App slug'
     required: true
   bitrise-build-trigger-token:
-    description: "Bitrise Build trigger token. Can be used as alternative to 'bitrise-token' when 'listen: false'. 'bitrise-token' takes priority."
+    description:
+      "Bitrise Build trigger token. Can be used as alternative to
+      'bitrise-token' when 'listen: false'. 'bitrise-token' takes priority."
     required: false
   bitrise-workflow:
-    description: "The name of the workflow you want to trigger"
+    description: 'The name of the workflow you want to trigger'
     required: true
   listen:
-    description: 'Set to `true` if you want to listen for the build logs and wait for build completion'
+    description:
+      'Set to `true` if you want to listen for the build logs and wait for build
+      completion'
     required: false
     default: 'false'
   update-interval:
@@ -32,10 +36,13 @@ inputs:
     required: false
     default: 'false'
   env-vars-for-bitrise:
-    description: 'Comma separated list of environment variables to send to Bitrise'
+    description:
+      'Comma separated list of environment variables to send to Bitrise'
     required: false
   stop-on-signals:
-    description: 'Comma separated list of process signals on which to stop the build. Default is SIGINT.'
+    description:
+      'Comma separated list of process signals on which to stop the build.
+      Default is SIGINT.'
     required: false
     default: 'SIGINT'
 outputs:
