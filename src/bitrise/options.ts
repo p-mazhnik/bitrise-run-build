@@ -3,10 +3,13 @@
 
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import type { BitriseEnvironment, BuildOptions } from './types'
-import { CommitPathsFilter } from './types'
+import type {
+  BitriseEnvironment,
+  BitriseBuildOptions,
+  CommitPathsFilter
+} from './types'
 
-export function createBuildOptions(): BuildOptions {
+export function createBuildOptions(): BitriseBuildOptions {
   const workflow = core.getInput('bitrise-workflow', { required: true })
 
   core.info(`Process "${github.context.eventName}" event`)

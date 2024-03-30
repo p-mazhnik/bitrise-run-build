@@ -80,7 +80,7 @@ export interface CommitPathsFilter {
   readonly removed?: string[]
 }
 
-export interface BuildOptions extends Record<string, any> {
+export interface BitriseBuildOptions extends Record<string, any> {
   branch_dest?: string
   branch_dest_repo_owner?: string
   branch_repo_owner?: string

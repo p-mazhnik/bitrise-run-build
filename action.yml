@@ -9,12 +9,12 @@ author: 'p-mazhnik'
 inputs:
   bitrise-token:
     description: "User-generated personal access token or Workspace API token"
-    required: true
+    required: false
   bitrise-app-slug:
     description: "Bitrise App slug"
     required: true
   bitrise-build-trigger-token:
-    description: "Bitrise Build trigger token"
+    description: "Bitrise Build trigger token. Can be used as alternative to 'bitrise-token' when 'listen: false'. 'bitrise-token' takes priority."
     required: false
   bitrise-workflow:
     description: "The name of the workflow you want to trigger"

@@ -1,12 +1,27 @@
 import * as core from '@actions/core'
 import { createClient } from './bitrise/client'
-import { abortBuild, triggerBuild } from './bitrise/build'
+import {
+  abortBuild,
+  triggerBuildWithBuildToken,
+  triggerBuild
+} from './bitrise/build'
 import type { AxiosInstance } from 'axios'
 import { createBuildOptions, getActorUsername } from './bitrise/options'
 import { waitForBuildEndTime } from './listen'
+import type { TriggeredBuildDetails } from './bitrise/types'
 
 export async function run() {
-  const bitriseToken = core.getInput('bitrise-token', { required: true })
+  const shouldListen = core.getBooleanInput('listen', { required: false })
+  const bitriseToken = core.getInput('bitrise-token', { required: false })
+  const bitriseBuildTriggerToken = core.getInput(
+    'bitrise-build-trigger-token',
+    { required: false }
+  )
+  if (shouldListen && !bitriseToken) {
+    core.setFailed("'bitrise-token' is required when 'listen: true'")
+    return
+  }
+
   const client = createClient({ token: bitriseToken })
 
   const bitriseAppId = core.getInput('bitrise-app-slug', { required: true })
@@ -15,13 +30,27 @@ export async function run() {
   const options = createBuildOptions()
   const actor = getActorUsername()
   try {
-    const build = await triggerBuild(client, bitriseAppId, options, actor)
+    let build: TriggeredBuildDetails
+    if (bitriseToken) {
+      build = await triggerBuild(client, bitriseAppId, options, actor)
+    } else if (bitriseBuildTriggerToken) {
+      build = await triggerBuildWithBuildToken(
+        bitriseBuildTriggerToken,
+        bitriseAppId,
+        options,
+        actor
+      )
+    } else {
+      core.setFailed(
+        "Either 'bitrise-token' or 'bitrise-build-trigger-token' required"
+      )
+      return
+    }
 
     core.info(`Build URL: ${build.build_url}`)
     core.setOutput('bitrise-build-id', build.build_slug)
     core.setOutput('bitrise-build-url', build.build_url)
 
-    const shouldListen = core.getBooleanInput('listen', { required: false })
     if (!shouldListen) {
       return
     }
