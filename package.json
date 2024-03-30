@@ -18,15 +18,16 @@
     "node": ">=20"
   },
   "scripts": {
-    "bundle": "npm run format:write && npm run build",
+    "bundle": "npm run format:write && npm run package",
     "ci-test": "jest",
     "format:write": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . -c ./.eslintrc.yml",
-    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
-    "build:watch": "npm run build -- --watch",
+    "build": "ncc build src/index.ts -o dist",
+    "package": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "package:watch": "npm run build -- --watch",
     "test": "jest",
-    "all": "npm run format:write && npm run lint && npm run test && npm run build"
+    "all": "npm run format:write && npm run lint && npm run test && npm run package"
   },
   "license": "MIT",
   "jest": {
