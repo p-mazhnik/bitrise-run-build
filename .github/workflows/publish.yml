@@ -26,7 +26,9 @@ jobs:
         id: install
         run: npm ci
 
-      # Compile dist/index.js and bundle with action.yml
+      - name: build
+        run: npm run build
+
       # Force push major and minor tags, e.g. v1, v1.0
       # See documentation: https://github.com/JasonEtco/build-and-tag-action
       - uses: JasonEtco/build-and-tag-action@v2
