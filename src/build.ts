@@ -8,7 +8,9 @@ import {
 import type { AxiosInstance } from 'axios'
 import { createBuildOptions, getActorUsername } from './bitrise/options'
 import { waitForBuildEndTime } from './listen'
-import type { TriggeredBuildDetails } from './bitrise/types'
+import type { BitriseAppDetails, TriggeredBuildDetails } from './bitrise/types'
+import { getAppDetails } from './bitrise/app'
+import { AxiosError } from 'axios'
 
 export async function run() {
   const shouldListen = core.getBooleanInput('listen', { required: false })
@@ -25,9 +27,19 @@ export async function run() {
   const client = createClient({ token: bitriseToken })
 
   const bitriseAppId = core.getInput('bitrise-app-slug', { required: true })
-
+  let appDetails: BitriseAppDetails | null = null
+  try {
+    if (bitriseToken) {
+      appDetails = await getAppDetails(client, bitriseAppId)
+    }
+  } catch (e) {
+    if (e instanceof AxiosError && e.response) {
+      core.error(e.response.data?.message)
+    }
+    core.setFailed(e as Error)
+  }
   // Start the build
-  const options = createBuildOptions()
+  const options = createBuildOptions(appDetails)
   const actor = getActorUsername()
   try {
     let build: TriggeredBuildDetails
@@ -72,6 +84,9 @@ export async function run() {
       updateInterval
     })
   } catch (e) {
+    if (e instanceof AxiosError && e.response) {
+      core.error(e.response.data?.message)
+    }
     core.setFailed(e as Error)
   }
 }

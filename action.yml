@@ -45,6 +45,12 @@ inputs:
       Default is SIGINT.'
     required: false
     default: 'SIGINT'
+  branch-override:
+    description: 'Overrides branch provided to Bitrise'
+    required: false
+  commit-override:
+    description: 'Overrides commit provided to Bitrise'
+    required: false
 outputs:
   bitrise-build-id:
     description: 'The Bitrise Build ID for this build.'
