@@ -32518,6 +32518,22 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 9813:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getAppDetails = void 0;
+const getAppDetails = async (client, appSlug) => {
+    const response = await client.get(`/apps/${appSlug}`);
+    return response.data.data;
+};
+exports.getAppDetails = getAppDetails;
+
+
+/***/ }),
+
 /***/ 4793:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -32656,7 +32672,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getActorUsername = exports.createBuildOptions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-function createBuildOptions() {
+function createBuildOptions(appDetails) {
     const workflow = core.getInput('bitrise-workflow', { required: true });
     core.info(`Process "${github.context.eventName}" event`);
     let defaultBranchOptions = null;
@@ -32665,13 +32681,10 @@ function createBuildOptions() {
     if (github.context.payload) {
         defaultBranchOptions = transformBasicEvent(github.context.payload);
     }
-    const repositoryOverride = core.getInput('repository-override', {
-        required: false
-    });
     const branchOverride = core.getInput('branch-override', { required: false });
     const commitOverride = core.getInput('commit-override', { required: false });
-    if (repositoryOverride || branchOverride || commitOverride) {
-        options = processOverrides(defaultBranchOptions, repositoryOverride, branchOverride, commitOverride);
+    if (branchOverride || commitOverride) {
+        options = processOverrides(appDetails, defaultBranchOptions, branchOverride, commitOverride);
     }
     else if (github.context.payload?.pull_request) {
         options = transformPullRequestEvent(github.context.payload.pull_request);
@@ -32693,6 +32706,10 @@ function createBuildOptions() {
     const skipGitStatusReport = core.getBooleanInput('skip-git-status-report', {
         required: false
     });
+    if (appDetails?.repo_url &&
+        appDetails.repo_url !== options.base_repository_url) {
+        core.warning(`Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${options.base_repository_url}"`);
+    }
     return {
         ...options,
         workflow_id: workflow,
@@ -32775,11 +32792,14 @@ function transformPullRequestEvent(pr) {
         pull_request_ready_state: getPrReadyState(pr)
     };
 }
-function processOverrides(defaultBranchOptions, repositoryOverride, branchOverride, commitOverride) {
+function processOverrides(appDetails, defaultBranchOptions, branchOverride, commitOverride) {
+    if (!appDetails) {
+        core.warning('It is recommended to use "bitrise-token" with overrides options.');
+    }
     let branchOptions = {};
-    if (repositoryOverride) {
+    if (appDetails?.repo_url) {
         branchOptions = {
-            base_repository_url: repositoryOverride
+            base_repository_url: appDetails.repo_url
         };
     }
     if (branchOverride.startsWith('refs/heads/')) {
@@ -32804,9 +32824,8 @@ function processOverrides(defaultBranchOptions, repositoryOverride, branchOverri
         ((branchOptions.branch &&
             branchOptions.branch === defaultBranchOptions?.branch) ||
             (branchOptions.tag && branchOptions.tag === defaultBranchOptions?.tag))) {
-        if (!repositoryOverride ||
-            (repositoryOverride &&
-                repositoryOverride === defaultBranchOptions?.base_repository_url)) {
+        if (appDetails?.repo_url &&
+            appDetails.repo_url === defaultBranchOptions?.base_repository_url) {
             // if branchOverride matches branch for push event and repository is the same,
             // just use the default options
             branchOptions = {
@@ -32903,6 +32922,7 @@ const client_1 = __nccwpck_require__(1722);
 const build_1 = __nccwpck_require__(4793);
 const options_1 = __nccwpck_require__(359);
 const listen_1 = __nccwpck_require__(1830);
+const app_1 = __nccwpck_require__(9813);
 async function run() {
     const shouldListen = core.getBooleanInput('listen', { required: false });
     const bitriseToken = core.getInput('bitrise-token', { required: false });
@@ -32913,8 +32933,17 @@ async function run() {
     }
     const client = (0, client_1.createClient)({ token: bitriseToken });
     const bitriseAppId = core.getInput('bitrise-app-slug', { required: true });
+    let appDetails = null;
+    try {
+        if (bitriseToken) {
+            appDetails = await (0, app_1.getAppDetails)(client, bitriseAppId);
+        }
+    }
+    catch (e) {
+        core.setFailed(e);
+    }
     // Start the build
-    const options = (0, options_1.createBuildOptions)();
+    const options = (0, options_1.createBuildOptions)(appDetails);
     const actor = (0, options_1.getActorUsername)();
     try {
         let build;

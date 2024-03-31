@@ -118,3 +118,23 @@ export interface BuildLogResponse {
   next_before_timestamp: string
   next_after_timestamp: string
 }
+
+export interface BitriseAppDetails {
+  slug: string
+  title: string
+  project_type: string
+  provider: string // github
+  repo_owner: string
+  repo_url?: string
+  repo_slug: string
+  is_disabled: boolean
+  status: number
+  is_public: boolean
+  is_github_checks_enabled: boolean
+  owner: {
+    account_type: string
+    name: string
+    slug: string
+  }
+  avatar_url: string | null
+}

@@ -45,9 +45,6 @@ inputs:
       Default is SIGINT.'
     required: false
     default: 'SIGINT'
-  repository-override:
-    description: 'Overrides base_repository_url option in Bitrise API'
-    required: false
   branch-override:
     description: 'Overrides branch provided to Bitrise'
     required: false

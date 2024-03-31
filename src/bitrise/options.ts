@@ -6,10 +6,13 @@ import * as github from '@actions/github'
 import type {
   BitriseEnvironment,
   BitriseBuildOptions,
-  CommitPathsFilter
+  CommitPathsFilter,
+  BitriseAppDetails
 } from './types'
 
-export function createBuildOptions(): BitriseBuildOptions {
+export function createBuildOptions(
+  appDetails: BitriseAppDetails | null
+): BitriseBuildOptions {
   const workflow = core.getInput('bitrise-workflow', { required: true })
 
   core.info(`Process "${github.context.eventName}" event`)
@@ -22,15 +25,12 @@ export function createBuildOptions(): BitriseBuildOptions {
     defaultBranchOptions = transformBasicEvent(github.context.payload)
   }
 
-  const repositoryOverride = core.getInput('repository-override', {
-    required: false
-  })
   const branchOverride = core.getInput('branch-override', { required: false })
   const commitOverride = core.getInput('commit-override', { required: false })
-  if (repositoryOverride || branchOverride || commitOverride) {
+  if (branchOverride || commitOverride) {
     options = processOverrides(
+      appDetails,
       defaultBranchOptions,
-      repositoryOverride,
       branchOverride,
       commitOverride
     )
@@ -54,6 +54,15 @@ export function createBuildOptions(): BitriseBuildOptions {
   const skipGitStatusReport = core.getBooleanInput('skip-git-status-report', {
     required: false
   })
+
+  if (
+    appDetails?.repo_url &&
+    appDetails.repo_url !== options.base_repository_url
+  ) {
+    core.warning(
+      `Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${options.base_repository_url}"`
+    )
+  }
 
   return {
     ...options,
@@ -145,15 +154,20 @@ function transformPullRequestEvent(pr: Record<string, any>) {
 }
 
 function processOverrides(
+  appDetails: BitriseAppDetails | null,
   defaultBranchOptions: Record<string, any> | null,
-  repositoryOverride: string,
   branchOverride: string,
   commitOverride: string
 ) {
+  if (!appDetails) {
+    core.warning(
+      'It is recommended to use "bitrise-token" with overrides options.'
+    )
+  }
   let branchOptions: Record<string, any> = {}
-  if (repositoryOverride) {
+  if (appDetails?.repo_url) {
     branchOptions = {
-      base_repository_url: repositoryOverride
+      base_repository_url: appDetails.repo_url
     }
   }
   if (branchOverride.startsWith('refs/heads/')) {
@@ -179,9 +193,8 @@ function processOverrides(
       (branchOptions.tag && branchOptions.tag === defaultBranchOptions?.tag))
   ) {
     if (
-      !repositoryOverride ||
-      (repositoryOverride &&
-        repositoryOverride === defaultBranchOptions?.base_repository_url)
+      appDetails?.repo_url &&
+      appDetails.repo_url === defaultBranchOptions?.base_repository_url
     ) {
       // if branchOverride matches branch for push event and repository is the same,
       // just use the default options
