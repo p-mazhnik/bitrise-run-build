@@ -1,5 +1,6 @@
 {
   "name": "bitrise-run-build",
+  "version": "1.1.0",
   "description": "Run Bitrise build as a step in GitHub Actions workflow.",
   "private": true,
   "homepage": "https://github.com/p-mazhnik/bitrise-run-build",
