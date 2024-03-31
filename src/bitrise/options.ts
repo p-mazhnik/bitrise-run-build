@@ -9,6 +9,7 @@ import type {
   CommitPathsFilter,
   BitriseAppDetails
 } from './types'
+import { urlsReferTheSameGitHubRepo } from '../utils'
 
 export function createBuildOptions(
   appDetails: BitriseAppDetails | null
@@ -57,7 +58,10 @@ export function createBuildOptions(
 
   if (
     appDetails?.repo_url &&
-    appDetails.repo_url !== defaultBranchOptions?.base_repository_url
+    !urlsReferTheSameGitHubRepo(
+      appDetails.repo_url,
+      defaultBranchOptions?.base_repository_url
+    )
   ) {
     core.warning(
       `Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${defaultBranchOptions?.base_repository_url}"`
@@ -198,7 +202,10 @@ function processOverrides(
   ) {
     if (
       appDetails?.repo_url &&
-      appDetails.repo_url === defaultBranchOptions?.base_repository_url
+      urlsReferTheSameGitHubRepo(
+        appDetails.repo_url,
+        defaultBranchOptions?.base_repository_url
+      )
     ) {
       // if branchOverride matches branch for push event and repository is the same,
       // just use the default options

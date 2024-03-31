@@ -32672,6 +32672,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getActorUsername = exports.createBuildOptions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const utils_1 = __nccwpck_require__(1314);
 function createBuildOptions(appDetails) {
     const workflow = core.getInput('bitrise-workflow', { required: true });
     core.info(`Process "${github.context.eventName}" event`);
@@ -32707,7 +32708,7 @@ function createBuildOptions(appDetails) {
         required: false
     });
     if (appDetails?.repo_url &&
-        appDetails.repo_url !== defaultBranchOptions?.base_repository_url) {
+        !(0, utils_1.urlsReferTheSameGitHubRepo)(appDetails.repo_url, defaultBranchOptions?.base_repository_url)) {
         core.warning(`Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${defaultBranchOptions?.base_repository_url}"`);
     }
     core.info(`Following source options will be sent to Bitrise: ${JSON.stringify(options, null, 2)}`);
@@ -32826,7 +32827,7 @@ function processOverrides(appDetails, defaultBranchOptions, branchOverride, comm
             branchOptions.branch === defaultBranchOptions?.branch) ||
             (branchOptions.tag && branchOptions.tag === defaultBranchOptions?.tag))) {
         if (appDetails?.repo_url &&
-            appDetails.repo_url === defaultBranchOptions?.base_repository_url) {
+            (0, utils_1.urlsReferTheSameGitHubRepo)(appDetails.repo_url, defaultBranchOptions?.base_repository_url)) {
             // if branchOverride matches branch for push event and repository is the same,
             // just use the default options
             branchOptions = {
@@ -33132,9 +33133,14 @@ function getStatusMessage(status) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sleep = void 0;
+exports.urlsReferTheSameGitHubRepo = exports.sleep = void 0;
 const sleep = async (delay) => new Promise(resolve => setTimeout(resolve, delay));
 exports.sleep = sleep;
+const urlsReferTheSameGitHubRepo = (url1, url2) => {
+    return (url1.replace('https://github.com/', 'git@github.com') ===
+        url2?.replace('https://github.com/', 'git@github.com'));
+};
+exports.urlsReferTheSameGitHubRepo = urlsReferTheSameGitHubRepo;
 
 
 /***/ }),
