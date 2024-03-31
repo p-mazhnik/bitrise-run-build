@@ -60,11 +60,11 @@ export function createBuildOptions(
     appDetails?.repo_url &&
     !urlsReferTheSameGitHubRepo(
       appDetails.repo_url,
-      defaultBranchOptions?.base_repository_url ?? options.base_repository_url
+      options.base_repository_url
     )
   ) {
     core.warning(
-      `Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${defaultBranchOptions?.base_repository_url ?? options.base_repository_url}"`
+      `Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${options.base_repository_url}"`
     )
   }
 
