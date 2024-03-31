@@ -174,7 +174,7 @@ To run Bitrise workflow associated with another repo:
     bitrise-app-slug: bitrise-app-id-2
     bitrise-workflow: primary
     listen: false
-    bitrise-build-trigger-token: BitriseBuildTriggerToken2
+    bitrise-token: BitrisePAT
     branch-override: dev
 ```
 
