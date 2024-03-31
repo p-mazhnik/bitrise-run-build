@@ -3,7 +3,7 @@ export const sleep = async (delay: number): Promise<void> =>
 
 export const urlsReferTheSameGitHubRepo = (url1: string, url2?: string) => {
   return (
-    url1.replace('https://github.com/', 'git@github.com') ===
-    url2?.replace('https://github.com/', 'git@github.com')
+    url1.replace('https://github.com/', 'git@github.com:') ===
+    url2?.replace('https://github.com/', 'git@github.com:')
   )
 }

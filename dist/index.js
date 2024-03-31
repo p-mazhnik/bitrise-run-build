@@ -32708,8 +32708,8 @@ function createBuildOptions(appDetails) {
         required: false
     });
     if (appDetails?.repo_url &&
-        !(0, utils_1.urlsReferTheSameGitHubRepo)(appDetails.repo_url, defaultBranchOptions?.base_repository_url)) {
-        core.warning(`Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${defaultBranchOptions?.base_repository_url}"`);
+        !(0, utils_1.urlsReferTheSameGitHubRepo)(appDetails.repo_url, defaultBranchOptions?.base_repository_url ?? options.base_repository_url)) {
+        core.warning(`Bitrise App's repository url "${appDetails.repo_url}" doesn't match current repository url "${defaultBranchOptions?.base_repository_url ?? options.base_repository_url}"`);
     }
     core.info(`Following source options will be sent to Bitrise: ${JSON.stringify(options, null, 2)}`);
     return {
@@ -33137,8 +33137,8 @@ exports.urlsReferTheSameGitHubRepo = exports.sleep = void 0;
 const sleep = async (delay) => new Promise(resolve => setTimeout(resolve, delay));
 exports.sleep = sleep;
 const urlsReferTheSameGitHubRepo = (url1, url2) => {
-    return (url1.replace('https://github.com/', 'git@github.com') ===
-        url2?.replace('https://github.com/', 'git@github.com'));
+    return (url1.replace('https://github.com/', 'git@github.com:') ===
+        url2?.replace('https://github.com/', 'git@github.com:'));
 };
 exports.urlsReferTheSameGitHubRepo = urlsReferTheSameGitHubRepo;
 
