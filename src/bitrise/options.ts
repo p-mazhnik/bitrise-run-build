@@ -14,10 +14,27 @@ export function createBuildOptions(): BitriseBuildOptions {
 
   core.info(`Process "${github.context.eventName}" event`)
 
+  let defaultBranchOptions: Record<string, any> | null = null
   let options: Record<string, any>
   const environments: BitriseEnvironment[] = prepareEnvironmentVariables()
 
-  if (github.context.payload?.pull_request) {
+  if (github.context.payload) {
+    defaultBranchOptions = transformBasicEvent(github.context.payload)
+  }
+
+  const repositoryOverride = core.getInput('repository-override', {
+    required: false
+  })
+  const branchOverride = core.getInput('branch-override', { required: false })
+  const commitOverride = core.getInput('commit-override', { required: false })
+  if (repositoryOverride || branchOverride || commitOverride) {
+    options = processOverrides(
+      defaultBranchOptions,
+      repositoryOverride,
+      branchOverride,
+      commitOverride
+    )
+  } else if (github.context.payload?.pull_request) {
     options = transformPullRequestEvent(github.context.payload.pull_request)
     if (github.context.payload.pull_request.draft) {
       environments.push({
@@ -27,21 +44,13 @@ export function createBuildOptions(): BitriseBuildOptions {
       })
     }
   } else {
-    if (!github.context.payload) {
+    if (!defaultBranchOptions) {
       core.setFailed('No payload found in the context.')
+      return {}
     }
-    options = transformBasicEvent(github.context.payload)
+    options = defaultBranchOptions
   }
 
-  switch (github.context.eventName) {
-    case 'pull_request': {
-      if (!github.context.payload?.pull_request) {
-        core.setFailed('No pull_request found in the payload.')
-        return {}
-      }
-      break
-    }
-  }
   const skipGitStatusReport = core.getBooleanInput('skip-git-status-report', {
     required: false
   })
@@ -133,6 +142,64 @@ function transformPullRequestEvent(pr: Record<string, any>) {
     diff_url: pr.diff_url,
     pull_request_ready_state: getPrReadyState(pr)
   }
+}
+
+function processOverrides(
+  defaultBranchOptions: Record<string, any> | null,
+  repositoryOverride: string,
+  branchOverride: string,
+  commitOverride: string
+) {
+  let branchOptions: Record<string, any> = {}
+  if (repositoryOverride) {
+    branchOptions = {
+      base_repository_url: repositoryOverride
+    }
+  }
+  if (branchOverride.startsWith('refs/heads/')) {
+    branchOptions = {
+      ...branchOptions,
+      branch: branchOverride.slice(11)
+    }
+  } else if (branchOverride.startsWith('refs/tags/')) {
+    branchOptions = {
+      ...branchOptions,
+      tag: branchOverride.slice(10)
+    }
+  } else if (branchOverride) {
+    branchOptions = {
+      ...branchOptions,
+      branch: branchOverride
+    }
+  }
+  if (
+    branchOverride &&
+    ((branchOptions.branch &&
+      branchOptions.branch === defaultBranchOptions?.branch) ||
+      (branchOptions.tag && branchOptions.tag === defaultBranchOptions?.tag))
+  ) {
+    if (
+      !repositoryOverride ||
+      (repositoryOverride &&
+        repositoryOverride === defaultBranchOptions?.base_repository_url)
+    ) {
+      // if branchOverride matches branch for push event and repository is the same,
+      // just use the default options
+      branchOptions = {
+        ...branchOptions,
+        ...defaultBranchOptions
+      }
+    }
+  }
+  if (commitOverride && commitOverride !== defaultBranchOptions?.commit_hash) {
+    branchOptions = {
+      branch: branchOptions.branch,
+      tag: branchOptions.tag,
+      commit_hash: commitOverride,
+      base_repository_url: branchOptions.base_repository_url
+    }
+  }
+  return branchOptions
 }
 
 function getRepositoryURL(

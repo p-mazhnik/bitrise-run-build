@@ -75,6 +75,40 @@ This action offers following inputs that you can use to configure its behavior.
    `true`, no build status report will be sent.  
    Defaults to `false`.
 
+1. **repository-override** (optional) :  
+   By default, this action retrieves branch, commit and repo information from
+   the current github context. In some cases, it is needed to trigger workflow
+   associated with another repository, or launch it for the different commit and
+   branch.  
+   `repository-override` can be used if workflow is associated with another
+   repository. It should match `Repository URL` from Bitrise App settings, and
+   can't be used to change repository associated with workflow.
+
+1. **branch-override** (optional) : Overrides branch provided to Bitrise. If
+   specified, Bitrise will use the head commit for this branch, unless
+   `commit-override` provided.
+
+1. **commit-override** If specified, tells Bitrise to use this commit for the
+   build.
+
+By default, regardless of the project configuration in Bitrise or GitHub
+Actions, we always pass the following parameters and values to Bitrise in the
+API call.
+
+| Bitrise value         | GitHub value                                                                       | Bitrise default                                |
+| --------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `commit_hash`         | The commit that triggered the workflow                                             | Head commit for the default / specified branch |
+| `branch`              | Current branch: `context.ref` or `pull_request.head.ref`                           | `Default branch` from Bitrise App settings     |
+| `base_repository_url` | The `HTTPS` git url for `context.repo` if repo is public;<br/> `ssh` url otherwise | `Repository URL` from Bitrise App settings     |
+
+Use `commit-override`, `branch-override` and `repository-override` to override
+values above.
+
+Note that `base_repository_url` should match `Repository URL` from Bitrise App
+settings, and can't be used to change repository associated with workflow.
+Instead, you can override Bitrise default envs (like `GIT_REPOSITORY_URL`) using
+`env-vars-for-bitrise` option.
+
 ### Outputs
 
 1. **bitrise-build-id** : The Bitrise build ID of the build that the action ran.
@@ -123,9 +157,25 @@ defined in the `env:` list to Bitrise.
     listen: false
     bitrise-build-trigger-token: BitriseBuildTriggerToken
     env-vars-for-bitrise: |
-      CUSTOM
+      CUSTOM,
+      GIT_REPOSITORY_URL
   env:
     CUSTOM: my environment variable
+    GIT_REPOSITORY_URL: git@github.com:p-mazhnik/repo.git # tell Clone step to use different repo
+```
+
+To run Bitrise workflow associated with another repo:
+
+```yaml
+- name: Run Bitrise workflow associated with another repo
+  uses: p-mazhnik/bitrise-run-build@v1
+  with:
+    bitrise-app-slug: bitrise-app-id-2
+    bitrise-workflow: primary
+    listen: false
+    bitrise-build-trigger-token: BitriseBuildTriggerToken2
+    repository-override: git@github.com:p-mazhnik/my-another-private-repo.git
+    branch-override: dev
 ```
 
 ## Implementation Notes
