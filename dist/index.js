@@ -32923,6 +32923,7 @@ const build_1 = __nccwpck_require__(4793);
 const options_1 = __nccwpck_require__(359);
 const listen_1 = __nccwpck_require__(1830);
 const app_1 = __nccwpck_require__(9813);
+const axios_1 = __nccwpck_require__(8757);
 async function run() {
     const shouldListen = core.getBooleanInput('listen', { required: false });
     const bitriseToken = core.getInput('bitrise-token', { required: false });
@@ -32940,6 +32941,9 @@ async function run() {
         }
     }
     catch (e) {
+        if (e instanceof axios_1.AxiosError && e.response) {
+            core.error(e.response.data?.message);
+        }
         core.setFailed(e);
     }
     // Start the build
@@ -32977,6 +32981,9 @@ async function run() {
         });
     }
     catch (e) {
+        if (e instanceof axios_1.AxiosError && e.response) {
+            core.error(e.response.data?.message);
+        }
         core.setFailed(e);
     }
 }
