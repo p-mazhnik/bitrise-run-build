@@ -13,6 +13,7 @@ export const waitForBuildEndTime = async (
 ) => {
   core.info(`Waiting for build ${appSlug}/${buildSlug} output...`)
   let count = 0
+  let onErrorRetriesCount = 0
   let pollingLogs = true
   let buildInfo: BuildDescription | undefined
   let lastPosition = 0
@@ -22,20 +23,21 @@ export const waitForBuildEndTime = async (
       await sleep(interval)
     }
 
-    buildInfo = await describeBuild(client, appSlug, buildSlug)
-
-    if (
-      buildInfo.is_on_hold ||
-      !buildInfo.started_on_worker_at ||
-      !pollingLogs
-    ) {
-      // build is not started yet
-      // or need to skip logs polling
-      continue
-    }
-
     let response: AxiosResponse<BuildLogResponse>
+
     try {
+      buildInfo = await describeBuild(client, appSlug, buildSlug)
+
+      if (
+        buildInfo.is_on_hold ||
+        !buildInfo.started_on_worker_at ||
+        !pollingLogs
+      ) {
+        // build is not started yet
+        // or need to skip logs polling
+        continue
+      }
+
       response = await client.get<BuildLogResponse>(
         `/apps/${appSlug}/builds/${buildSlug}/log`
       )
@@ -44,6 +46,10 @@ export const waitForBuildEndTime = async (
         core.info(error.response.data?.message)
         if (error.response.status === 404) {
           // We may have 404 error until build is started
+          if (onErrorRetriesCount >= 5) {
+            throw error
+          }
+          onErrorRetriesCount++
           continue
         }
       }
@@ -80,7 +86,7 @@ export const waitForBuildEndTime = async (
         }
       }
     }
-  } while (!buildInfo.finished_at)
+  } while (!buildInfo?.finished_at)
 
   if (buildInfo.status !== 1) {
     core.setFailed(getStatusMessage(buildInfo.status))
