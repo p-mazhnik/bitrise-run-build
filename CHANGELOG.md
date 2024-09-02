@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.2
+
+- Cleanup attempt number if request is successful
+
 ## v1.1.1
 
 - Retry logs fetching in case of network errors
