@@ -13,7 +13,8 @@ export const waitForBuildEndTime = async (
 ) => {
   core.info(`Waiting for build ${appSlug}/${buildSlug} output...`)
   let count = 0
-  let onErrorRetriesCount = 0
+  const maxAttempts = 5
+  let attemptNumber = 1
   let pollingLogs = true
   let buildInfo: BuildDescription | undefined
   let lastPosition = 0
@@ -44,16 +45,15 @@ export const waitForBuildEndTime = async (
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         core.info(error.response.data?.message)
-        if (error.response.status === 404) {
-          // We may have 404 error until build is started
-          if (onErrorRetriesCount >= 5) {
-            throw error
-          }
-          onErrorRetriesCount++
-          continue
-        }
       }
-      throw error
+      if (attemptNumber >= maxAttempts) {
+        throw error
+      }
+      attemptNumber++
+      core.info(
+        `Retrying to fetch logs, attempt #${attemptNumber} of ${maxAttempts}`
+      )
+      continue
     }
 
     ++count
