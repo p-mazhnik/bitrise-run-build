@@ -13,6 +13,8 @@ export const waitForBuildEndTime = async (
 ) => {
   core.info(`Waiting for build ${appSlug}/${buildSlug} output...`)
   let count = 0
+  const maxAttempts = 5
+  let attemptNumber = 1
   let pollingLogs = true
   let buildInfo: BuildDescription | undefined
   let lastPosition = 0
@@ -22,32 +24,36 @@ export const waitForBuildEndTime = async (
       await sleep(interval)
     }
 
-    buildInfo = await describeBuild(client, appSlug, buildSlug)
-
-    if (
-      buildInfo.is_on_hold ||
-      !buildInfo.started_on_worker_at ||
-      !pollingLogs
-    ) {
-      // build is not started yet
-      // or need to skip logs polling
-      continue
-    }
-
     let response: AxiosResponse<BuildLogResponse>
+
     try {
+      buildInfo = await describeBuild(client, appSlug, buildSlug)
+
+      if (
+        buildInfo.is_on_hold ||
+        !buildInfo.started_on_worker_at ||
+        !pollingLogs
+      ) {
+        // build is not started yet
+        // or need to skip logs polling
+        continue
+      }
+
       response = await client.get<BuildLogResponse>(
         `/apps/${appSlug}/builds/${buildSlug}/log`
       )
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         core.info(error.response.data?.message)
-        if (error.response.status === 404) {
-          // We may have 404 error until build is started
-          continue
-        }
       }
-      throw error
+      if (attemptNumber >= maxAttempts) {
+        throw error
+      }
+      attemptNumber++
+      core.info(
+        `Retrying to fetch logs, attempt #${attemptNumber} of ${maxAttempts}`
+      )
+      continue
     }
 
     ++count
@@ -80,7 +86,7 @@ export const waitForBuildEndTime = async (
         }
       }
     }
-  } while (!buildInfo.finished_at)
+  } while (!buildInfo?.finished_at)
 
   if (buildInfo.status !== 1) {
     core.setFailed(getStatusMessage(buildInfo.status))
