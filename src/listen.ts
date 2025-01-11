@@ -42,6 +42,8 @@ export const waitForBuildEndTime = async (
       response = await client.get<BuildLogResponse>(
         `/apps/${appSlug}/builds/${buildSlug}/log`
       )
+      // cleanup attempt number if request is successful
+      attemptNumber = 1
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         core.info(error.response.data?.message)
