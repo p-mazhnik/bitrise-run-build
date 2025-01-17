@@ -51,7 +51,7 @@ jobs:
           bitrise-app-slug: ${{ vars.BITRISE_APP_SLUG }}
           bitrise-build-trigger-token: ${{ secrets.BITRISE_BUILD_TOKEN }}
           bitrise-workflow: primary
-          listen: false # false is required because 'bitrise-token' is not proided
+          listen: false # false is required because 'bitrise-token' is not provided
 
       - name: Print build url
         run: echo "${{ steps.test-action-trigger.outputs.bitrise-build-url }}"
