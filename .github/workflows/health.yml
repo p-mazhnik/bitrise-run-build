@@ -40,6 +40,17 @@ jobs:
           bitrise-workflow: primary
           listen: true
 
-      - name: Print Output
-        id: output
+      - name: Print build url
         run: echo "${{ steps.test-action.outputs.bitrise-build-url }}"
+
+      - name: Test Local Action with bitrise-build-trigger-token
+        id: test-action-trigger
+        uses: ./
+        with:
+          bitrise-app-slug: ${{ vars.BITRISE_APP_SLUG }}
+          bitrise-build-trigger-token: ${{ secrets.BITRISE_BUILD_TOKEN }}
+          bitrise-workflow: primary
+          listen: false # false is required because 'bitrise-token' is not proided
+
+      - name: ${{ steps.test-action-trigger.outputs.bitrise-build-url }}
+        run: echo "${{ steps.test-action-trigger.outputs.bitrise-build-url }}"
