@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -52,5 +53,5 @@ jobs:
           bitrise-workflow: primary
           listen: false # false is required because 'bitrise-token' is not proided
 
-      - name: ${{ steps.test-action-trigger.outputs.bitrise-build-url }}
+      - name: Print build url
         run: echo "${{ steps.test-action-trigger.outputs.bitrise-build-url }}"
