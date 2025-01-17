@@ -13,13 +13,14 @@ The user experience is the same as it would be if the logic were executed in the
 
 This action offers following inputs that you can use to configure its behavior.
 
-1. **bitrise-app-slug** (required) : A unique ID of Bitrise application.
-To find the slug:
- - Open Bitrise CI and select your project.
- - Once on the project's page, go to your browser's address bar.  
-   The URL will look like this: `https://app.bitrise.io/app/7ca800ec-5cb7-478f-8ef1-c0ad4886f5bd`. 
- - Find the hexadecimal number after the `/app/` section of the URL. That is your project's slug.  
-  [Source](https://devcenter.bitrise.io/en/api/identifying-workspaces-and-apps-with-their-slugs.html#finding-a-slug-on-the-bitrise-website)
+1. **bitrise-app-slug** (required) : A unique ID of Bitrise application. To find the slug:
+   - Open Bitrise CI and select your project.
+   - Once on the project's page, go to your browser's address bar.  
+     The URL will look like this: `https://app.bitrise.io/app/7ca800ec-5cb7-478f-8ef1-c0ad4886f5bd`. 
+   - Find the hexadecimal number after the `/app/` section of the URL. That is your project's slug.  
+
+   [Source doc][bitrise-app-slug-doc]
+
 1. **bitrise-workflow** (required) : The name of Bitrise workflow you want to
    run.
 
@@ -209,6 +210,8 @@ copy of this license is included in the [LICENSE][license] file.
 [bitrise]: https://bitrise.io/
 [bitrise-pat]:
   https://devcenter.bitrise.io/en/accounts/personal-access-tokens.html#creating-a-personal-access-token
+[bitrise-app-slug-doc]:
+  https://devcenter.bitrise.io/en/api/identifying-workspaces-and-apps-with-their-slugs.html#finding-a-slug-on-the-bitrise-website
 [bitrise-workspace-token]:
   https://devcenter.bitrise.io/en/workspaces/workspace-api-token.html#creating-a-workspace-api-token
 [bitrise-api]: https://devcenter.bitrise.io/en/api.html
