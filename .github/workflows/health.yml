@@ -1,0 +1,45 @@
+name: Action health check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test-action:
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: build
+        run: npm run build
+
+      - name: Test Local Action with bitrise-token
+        id: test-action
+        uses: ./
+        with:
+          bitrise-app-slug: ${{ vars.BITRISE_APP_SLUG }}
+          bitrise-token: ${{ secrets.BITRISE_TOKEN }}
+          bitrise-workflow: primary
+          listen: true
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.test-action.outputs.bitrise-build-url }}"
