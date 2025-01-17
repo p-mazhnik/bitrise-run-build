@@ -4,8 +4,9 @@ This action runs a [Bitrise][bitrise] build as a step in a GitHub Actions
 workflow job.
 
 The action starts the Bitrise workflow, optionally collects the logs and prints
-them as they are written. If the GitHub job is canceled, the Bitrise workflow build will also be canceled. 
-The user experience is the same as it would be if the logic were executed in the GitHub Actions job runner.
+them as they are written. If the GitHub job is canceled, the Bitrise workflow
+build will also be canceled. The user experience is the same as it would be if
+the logic were executed in the GitHub Actions job runner.
 
 ## Usage
 
@@ -13,11 +14,15 @@ The user experience is the same as it would be if the logic were executed in the
 
 This action offers following inputs that you can use to configure its behavior.
 
-1. **bitrise-app-slug** (required) : A unique ID of Bitrise application. To find the slug:
+1. **bitrise-app-slug** (required) : A unique ID of Bitrise application. To find
+   the slug:
+
    - Open Bitrise CI and select your project.
    - Once on the project's page, go to your browser's address bar.  
-     The URL will look like this: `https://app.bitrise.io/app/7ca800ec-5cb7-478f-8ef1-c0ad4886f5bd`. 
-   - Find the hexadecimal number after the `/app/` section of the URL. That is your project's slug.  
+     The URL will look like this:
+     `https://app.bitrise.io/app/7ca800ec-5cb7-478f-8ef1-c0ad4886f5bd`.
+   - Find the hexadecimal number after the `/app/` section of the URL. That is
+     your project's slug.
 
    [Source doc][bitrise-app-slug-doc]
 
@@ -30,7 +35,8 @@ This action offers following inputs that you can use to configure its behavior.
 
 1. **bitrise-token** (required if `listen` is `true` or
    `bitrise-build-trigger-token` is not provided) : User-generated [personal
-   access token][bitrise-pat] or [Workspace API token][bitrise-workspace-token].  
+   access token][bitrise-pat] or [Workspace API
+   token][bitrise-workspace-token].  
    Make sure token has correct permissions to run builds and view their logs.
 
 1. **bitrise-build-trigger-token** (required if `bitrise-token` is not provided
