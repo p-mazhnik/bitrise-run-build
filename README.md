@@ -4,8 +4,9 @@ This action runs a [Bitrise][bitrise] build as a step in a GitHub Actions
 workflow job.
 
 The action starts the Bitrise workflow, optionally collects the logs and prints
-them as they are written. The user experience is the same as it would be if the
-logic were executed in the GitHub Actions job runner.
+them as they are written. If the GitHub job is canceled, the Bitrise workflow
+build will also be canceled. The user experience is the same as it would be if
+the logic were executed in the GitHub Actions job runner.
 
 ## Usage
 
@@ -13,7 +14,18 @@ logic were executed in the GitHub Actions job runner.
 
 This action offers following inputs that you can use to configure its behavior.
 
-1. **bitrise-app-slug** (required) : A unique ID of Bitrise application
+1. **bitrise-app-slug** (required) : A unique ID of Bitrise application. To find
+   the slug:
+
+   - Open Bitrise CI and select your project.
+   - Once on the project's page, go to your browser's address bar.  
+     The URL will look like this:
+     `https://app.bitrise.io/app/7ca800ec-5cb7-478f-8ef1-c0ad4886f5bd`.
+   - Find the hexadecimal number after the `/app/` section of the URL. That is
+     your project's slug.
+
+   [Source doc][bitrise-app-slug-doc]
+
 1. **bitrise-workflow** (required) : The name of Bitrise workflow you want to
    run.
 
@@ -23,7 +35,9 @@ This action offers following inputs that you can use to configure its behavior.
 
 1. **bitrise-token** (required if `listen` is `true` or
    `bitrise-build-trigger-token` is not provided) : User-generated [personal
-   access token][bitrise-pat] or [Workspace API token][bitrise-workspace-token].
+   access token][bitrise-pat] or [Workspace API
+   token][bitrise-workspace-token].  
+   Make sure token has correct permissions to run builds and view their logs.
 
 1. **bitrise-build-trigger-token** (required if `bitrise-token` is not provided
    and `listen` is `false`) : Bitrise Build trigger token. To find the token:
@@ -126,7 +140,7 @@ docs][github workflow syntax].
   uses: p-mazhnik/bitrise-run-build@v1
   with:
     bitrise-app-slug: bitrise-app-id
-    bitrise-token: BitrisePAT
+    bitrise-token: ${{ secrets.BITRISE_TOKEN }}
     bitrise-workflow: primary
     listen: true
 ```
@@ -139,9 +153,9 @@ for logs and result:
   uses: p-mazhnik/bitrise-run-build@v1
   with:
     bitrise-app-slug: bitrise-app-id
-    bitrise-build-trigger-token: BitriseBuildTriggerToken
+    bitrise-build-trigger-token: ${{ secrets.BITRISE_BUILD_TOKEN }}
     # alternatively, provide 'bitrise-token':
-    # bitrise-token: BitrisePAT
+    # bitrise-token: ${{ secrets.BITRISE_TOKEN }}
     bitrise-workflow: primary
     listen: false
 ```
@@ -156,7 +170,7 @@ defined in the `env:` list to Bitrise.
     bitrise-app-slug: bitrise-app-id
     bitrise-workflow: primary
     listen: false
-    bitrise-build-trigger-token: BitriseBuildTriggerToken
+    bitrise-build-trigger-token: ${{ secrets.BITRISE_BUILD_TOKEN }}
     env-vars-for-bitrise: |
       CUSTOM,
       GIT_REPOSITORY_URL
@@ -174,7 +188,7 @@ To run Bitrise workflow associated with another repo:
     bitrise-app-slug: bitrise-app-id-2
     bitrise-workflow: primary
     listen: false
-    bitrise-token: BitrisePAT
+    bitrise-token: ${{ secrets.BITRISE_TOKEN }}
     branch-override: dev
 ```
 
@@ -202,6 +216,8 @@ copy of this license is included in the [LICENSE][license] file.
 [bitrise]: https://bitrise.io/
 [bitrise-pat]:
   https://devcenter.bitrise.io/en/accounts/personal-access-tokens.html#creating-a-personal-access-token
+[bitrise-app-slug-doc]:
+  https://devcenter.bitrise.io/en/api/identifying-workspaces-and-apps-with-their-slugs.html#finding-a-slug-on-the-bitrise-website
 [bitrise-workspace-token]:
   https://devcenter.bitrise.io/en/workspaces/workspace-api-token.html#creating-a-workspace-api-token
 [bitrise-api]: https://devcenter.bitrise.io/en/api.html
