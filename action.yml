@@ -19,8 +19,11 @@ inputs:
       'bitrise-token' when 'listen: false'. 'bitrise-token' takes priority."
     required: false
   bitrise-workflow:
-    description: 'The name of the workflow you want to trigger'
-    required: true
+    description: 'The name of the workflow you want to trigger (mutually exclusive with pipeline-id)'
+    required: false
+  pipeline-id:
+    description: 'The ID of the pipeline you want to trigger (mutually exclusive with bitrise-workflow)'
+    required: false
   listen:
     description:
       'Set to `true` if you want to listen for the build logs and wait for build

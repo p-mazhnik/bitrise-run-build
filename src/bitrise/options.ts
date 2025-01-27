@@ -14,7 +14,18 @@ import { urlsReferTheSameGitHubRepo } from '../utils'
 export function createBuildOptions(
   appDetails: BitriseAppDetails | null
 ): BitriseBuildOptions {
-  const workflow = core.getInput('bitrise-workflow', { required: true })
+  const workflow = core.getInput('bitrise-workflow', { required: false })
+  const pipelineId = core.getInput('pipeline-id', { required: false })
+
+  if (!workflow && !pipelineId) {
+    core.setFailed('Either bitrise-workflow or pipeline-id must be provided')
+    return {}
+  }
+
+  if (workflow && pipelineId) {
+    core.setFailed('Cannot specify both bitrise-workflow and pipeline-id')
+    return {}
+  }
 
   core.info(`Process "${github.context.eventName}" event`)
 
@@ -74,7 +85,8 @@ export function createBuildOptions(
 
   return {
     ...options,
-    workflow_id: workflow,
+    workflow_id: workflow || undefined,
+    pipeline_id: pipelineId || undefined,
     skip_git_status_report: skipGitStatusReport,
     environments
   }

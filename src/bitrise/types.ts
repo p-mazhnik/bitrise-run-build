@@ -88,6 +88,7 @@ export interface BitriseBuildOptions extends Record<string, any> {
   commit_hash?: string
   commit_message?: string
   diff_url?: string
+  pipeline_id?: string
   pull_request_author?: string
   pull_request_head_branch?: string
   pull_request_id?: number
