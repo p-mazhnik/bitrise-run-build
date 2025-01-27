@@ -29,6 +29,9 @@ This action offers following inputs that you can use to configure its behavior.
 1. **bitrise-workflow** (required) : The name of Bitrise workflow you want to
    run.
 
+1. **bitrise-pipeline** (optional) : The name of the pipeline you want to
+   trigger. This is mutually exclusive with `bitrise-workflow` - you must
+   specify either a workflow or a pipeline, but not both.
 1. **listen** (optional) : Stream the logs as the build is happening on Bitrise
    and wait for build completion. Defaults to `false`, meaning that action will
    only trigger the build.
@@ -107,14 +110,6 @@ This action offers following inputs that you can use to configure its behavior.
 
 1. **commit-override** (optional) : If specified, tells Bitrise to use this
    commit hash for the build.
-
-1. **pipeline-id** (optional) : The ID of the pipeline you want to trigger. This is 
-   mutually exclusive with `bitrise-workflow` - you must specify either a workflow 
-   or a pipeline, but not both. You can get the pipeline ID by:
-   - Opening your app on Bitrise
-   - Going to the Pipelines tab
-   - Clicking on a pipeline
-   - Copying the ID from the URL (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 
 By default, regardless of the project configuration in Bitrise or GitHub
 Actions, the following parameters and values are always passed to Bitrise in the

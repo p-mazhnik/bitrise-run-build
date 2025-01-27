@@ -16,14 +16,22 @@ export function createBuildOptions(
 ): BitriseBuildOptions {
   const workflow = core.getInput('bitrise-workflow', { required: false })
   const pipeline = core.getInput('bitrise-pipeline', { required: false })
+  const listen = core.getBooleanInput('listen', { required: false })
 
   if (!workflow && !pipeline) {
-    core.setFailed('Either bitrise-workflow or pipeline-id must be provided')
+    core.setFailed(
+      'Either bitrise-workflow or bitrise-pipeline must be provided'
+    )
     return {}
   }
 
   if (workflow && pipeline) {
-    core.setFailed('Cannot specify both bitrise-workflow and pipeline-id')
+    core.setFailed('Cannot specify both bitrise-workflow and bitrise-pipeline')
+    return {}
+  }
+
+  if (pipeline && listen) {
+    core.setFailed('Listen option is not supported with bitrise-pipeline')
     return {}
   }
 
