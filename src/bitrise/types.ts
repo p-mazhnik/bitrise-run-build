@@ -81,26 +81,33 @@ export interface CommitPathsFilter {
 }
 
 export interface BitriseBuildOptions extends Record<string, any> {
+  branch?: string
   branch_dest?: string
   branch_dest_repo_owner?: string
   branch_repo_owner?: string
   build_request_slug?: string
   commit_hash?: string
   commit_message?: string
+  commit_messages?: string[]
+  commit_paths?: CommitPathsFilter[]
   diff_url?: string
+  environments?: BitriseEnvironment[]
+  head_repository_url?: string
   pipeline_id?: string
   pull_request_author?: string
   pull_request_head_branch?: string
   pull_request_id?: number
   pull_request_merge_branch?: string
-  pull_request_repository_url?: string
-  skip_git_status_report?: boolean
-  tag?: string
   pull_request_ready_state?:
     | 'draft'
     | 'ready_for_review'
     | 'converted_to_ready_for_review'
-  environments?: BitriseEnvironment[]
+  pull_request_repository_url?: string
+  pull_request_unverified_merge_branch?: string
+  base_repository_url?: string
+  skip_git_status_report?: boolean
+  tag?: string
+  workflow_id?: string
 }
 
 export interface BitriseEnvironment {
