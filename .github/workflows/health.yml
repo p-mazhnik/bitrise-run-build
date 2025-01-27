@@ -57,7 +57,7 @@ jobs:
         run: echo "${{ steps.test-action-trigger.outputs.bitrise-build-url }}"
 
       - name: Test pipeline with bitrise-build-trigger-token
-        id: test-action
+        id: test-action-pipeline
         uses: ./
         with:
           bitrise-app-slug: ${{ vars.BITRISE_APP_SLUG }}
