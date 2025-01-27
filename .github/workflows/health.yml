@@ -55,3 +55,12 @@ jobs:
 
       - name: Print build url
         run: echo "${{ steps.test-action-trigger.outputs.bitrise-build-url }}"
+
+      - name: Test pipeline with bitrise-build-trigger-token
+        id: test-action-pipeline
+        uses: ./
+        with:
+          bitrise-app-slug: ${{ vars.BITRISE_APP_SLUG }}
+          bitrise-build-trigger-token: ${{ secrets.BITRISE_BUILD_TOKEN }}
+          bitrise-pipeline: primary-pipeline
+          listen: false
