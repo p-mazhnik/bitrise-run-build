@@ -1,7 +1,11 @@
 # Changelog
 
-## v1.1.2
+## v1.2.0
 
+### Enhancements
+- Support Bitrise pipelines [#29](https://github.com/p-mazhnik/bitrise-run-build/pull/29)
+
+### Fixes
 - Cleanup attempt number if request is successful
 
 ## v1.1.1
