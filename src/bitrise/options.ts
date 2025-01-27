@@ -15,14 +15,14 @@ export function createBuildOptions(
   appDetails: BitriseAppDetails | null
 ): BitriseBuildOptions {
   const workflow = core.getInput('bitrise-workflow', { required: false })
-  const pipelineId = core.getInput('pipeline-id', { required: false })
+  const pipeline = core.getInput('bitrise-pipeline', { required: false })
 
-  if (!workflow && !pipelineId) {
+  if (!workflow && !pipeline) {
     core.setFailed('Either bitrise-workflow or pipeline-id must be provided')
     return {}
   }
 
-  if (workflow && pipelineId) {
+  if (workflow && pipeline) {
     core.setFailed('Cannot specify both bitrise-workflow and pipeline-id')
     return {}
   }
@@ -86,7 +86,7 @@ export function createBuildOptions(
   return {
     ...options,
     workflow_id: workflow || undefined,
-    pipeline_id: pipelineId || undefined,
+    pipeline_id: pipeline || undefined,
     skip_git_status_report: skipGitStatusReport,
     environments
   }

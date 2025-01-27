@@ -206,10 +206,11 @@ To run Bitrise pipeline:
 - name: Run Bitrise pipeline
   uses: p-mazhnik/bitrise-run-build@v1
   with:
-    bitrise-app-slug: bitrise-app-id
+    bitrise-app-slug: bitrise-app-id-2
+    bitrise-pipeline: primary
+    listen: false
     bitrise-token: ${{ secrets.BITRISE_TOKEN }}
-    pipeline-id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-    listen: true
+    branch-override: dev
 ```
 
 ## Implementation Notes
