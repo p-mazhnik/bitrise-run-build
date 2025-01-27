@@ -14,7 +14,26 @@ import { urlsReferTheSameGitHubRepo } from '../utils'
 export function createBuildOptions(
   appDetails: BitriseAppDetails | null
 ): BitriseBuildOptions {
-  const workflow = core.getInput('bitrise-workflow', { required: true })
+  const workflow = core.getInput('bitrise-workflow', { required: false })
+  const pipeline = core.getInput('bitrise-pipeline', { required: false })
+  const listen = core.getBooleanInput('listen', { required: false })
+
+  if (!workflow && !pipeline) {
+    core.setFailed(
+      'Either bitrise-workflow or bitrise-pipeline must be provided'
+    )
+    return {}
+  }
+
+  if (workflow && pipeline) {
+    core.setFailed('Cannot specify both bitrise-workflow and bitrise-pipeline')
+    return {}
+  }
+
+  if (pipeline && listen) {
+    core.setFailed('Listen option is not supported with bitrise-pipeline')
+    return {}
+  }
 
   core.info(`Process "${github.context.eventName}" event`)
 
@@ -74,7 +93,8 @@ export function createBuildOptions(
 
   return {
     ...options,
-    workflow_id: workflow,
+    workflow_id: workflow || undefined,
+    pipeline_id: pipeline || undefined,
     skip_git_status_report: skipGitStatusReport,
     environments
   }

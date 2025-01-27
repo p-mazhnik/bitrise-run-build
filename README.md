@@ -29,6 +29,9 @@ This action offers following inputs that you can use to configure its behavior.
 1. **bitrise-workflow** (required) : The name of Bitrise workflow you want to
    run.
 
+1. **bitrise-pipeline** (optional) : The name of the pipeline you want to
+   trigger. This is mutually exclusive with `bitrise-workflow` - you must
+   specify either a workflow or a pipeline, but not both.
 1. **listen** (optional) : Stream the logs as the build is happening on Bitrise
    and wait for build completion. Defaults to `false`, meaning that action will
    only trigger the build.
@@ -187,6 +190,19 @@ To run Bitrise workflow associated with another repo:
   with:
     bitrise-app-slug: bitrise-app-id-2
     bitrise-workflow: primary
+    listen: false
+    bitrise-token: ${{ secrets.BITRISE_TOKEN }}
+    branch-override: dev
+```
+
+To run Bitrise pipeline:
+
+```yaml
+- name: Run Bitrise pipeline
+  uses: p-mazhnik/bitrise-run-build@v1
+  with:
+    bitrise-app-slug: bitrise-app-id-2
+    bitrise-pipeline: primary
     listen: false
     bitrise-token: ${{ secrets.BITRISE_TOKEN }}
     branch-override: dev
