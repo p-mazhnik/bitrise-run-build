@@ -108,6 +108,14 @@ This action offers following inputs that you can use to configure its behavior.
 1. **commit-override** (optional) : If specified, tells Bitrise to use this
    commit hash for the build.
 
+1. **pipeline-id** (optional) : The ID of the pipeline you want to trigger. This is 
+   mutually exclusive with `bitrise-workflow` - you must specify either a workflow 
+   or a pipeline, but not both. You can get the pipeline ID by:
+   - Opening your app on Bitrise
+   - Going to the Pipelines tab
+   - Clicking on a pipeline
+   - Copying the ID from the URL (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+
 By default, regardless of the project configuration in Bitrise or GitHub
 Actions, the following parameters and values are always passed to Bitrise in the
 API call.
@@ -190,6 +198,18 @@ To run Bitrise workflow associated with another repo:
     listen: false
     bitrise-token: ${{ secrets.BITRISE_TOKEN }}
     branch-override: dev
+```
+
+To run Bitrise pipeline:
+
+```yaml
+- name: Run Bitrise pipeline
+  uses: p-mazhnik/bitrise-run-build@v1
+  with:
+    bitrise-app-slug: bitrise-app-id
+    bitrise-token: ${{ secrets.BITRISE_TOKEN }}
+    pipeline-id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    listen: true
 ```
 
 ## Implementation Notes
