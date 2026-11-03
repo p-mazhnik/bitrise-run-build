@@ -1,9 +1,9 @@
-import { sleep } from './utils'
 import * as core from '@actions/core'
-import { describeBuild } from './bitrise/build'
-import type { BuildLogResponse, BuildDescription } from './bitrise/types'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 import { AxiosError } from 'axios'
+import { describeBuild } from './bitrise/build'
+import type { BuildDescription, BuildLogResponse } from './bitrise/types'
+import { sleep } from './utils'
 
 export const waitForBuildEndTime = async (
   client: AxiosInstance,

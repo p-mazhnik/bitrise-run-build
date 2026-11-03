@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // https://github.com/bitrise-io/bitrise-webhooks/blob/c2eb7226bc838ad36c27cdcba63eaf91b3e791d0/service/hook/github/github.go
 
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import type {
-  BitriseEnvironment,
-  BitriseBuildOptions,
-  CommitPathsFilter,
-  BitriseAppDetails
-} from './types'
 import { urlsReferTheSameGitHubRepo } from '../utils'
+import type {
+  BitriseAppDetails,
+  BitriseBuildOptions,
+  BitriseEnvironment,
+  CommitPathsFilter
+} from './types'
 
 export function createBuildOptions(
   appDetails: BitriseAppDetails | null

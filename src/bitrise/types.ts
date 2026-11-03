@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface PageInfo {
   readonly next?: string
   readonly total_item_count: number
@@ -99,7 +97,9 @@ export interface BitriseBuildOptions extends Record<string, any> {
   pull_request_id?: number
   pull_request_merge_branch?: string
   pull_request_ready_state?:
-    'draft' | 'ready_for_review' | 'converted_to_ready_for_review'
+    | 'draft'
+    | 'ready_for_review'
+    | 'converted_to_ready_for_review'
   pull_request_repository_url?: string
   pull_request_unverified_merge_branch?: string
   base_repository_url?: string

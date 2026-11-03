@@ -1,6 +1,6 @@
-import { jest } from '@jest/globals'
-import { AxiosError } from 'axios'
 import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
+import { AxiosError } from 'axios'
+import { describe, expect, it, vi } from 'vitest'
 import { createClient } from '../src/bitrise/client'
 
 function unavailable(config: InternalAxiosRequestConfig): AxiosError {
@@ -22,7 +22,7 @@ function unavailable(config: InternalAxiosRequestConfig): AxiosError {
 describe('Bitrise HTTP client', () => {
   it('retries a transient read failure and preserves authentication', async () => {
     const client = createClient({ token: 'test-token' })
-    const adapter = jest
+    const adapter = vi
       .fn<AxiosAdapter>()
       .mockImplementationOnce(async config => {
         throw unavailable(config)
@@ -50,7 +50,7 @@ describe('Bitrise HTTP client', () => {
 
   it('does not retry a failed build creation and risk starting duplicate builds', async () => {
     const client = createClient({ token: 'test-token' })
-    const adapter = jest.fn<AxiosAdapter>().mockImplementation(async config => {
+    const adapter = vi.fn<AxiosAdapter>().mockImplementation(async config => {
       throw unavailable(config)
     })
     client.defaults.adapter = adapter

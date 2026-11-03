@@ -1,5 +1,5 @@
-import { create } from 'axios'
 import type { AxiosInstance } from 'axios'
+import { create } from 'axios'
 import axiosRetry, { exponentialDelay } from 'axios-retry'
 
 export const createClient = ({ token }: { token: string }): AxiosInstance => {
