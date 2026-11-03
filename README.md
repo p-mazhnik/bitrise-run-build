@@ -142,7 +142,7 @@ docs][github workflow syntax].
 
 ```yaml
 - name: Run Bitrise build
-  uses: p-mazhnik/bitrise-run-build@v1
+  uses: p-mazhnik/bitrise-run-build@v2
   with:
     bitrise-app-slug: bitrise-app-id
     bitrise-token: ${{ secrets.BITRISE_TOKEN }}
@@ -155,7 +155,7 @@ for logs and result:
 
 ```yaml
 - name: Trigger Bitrise build
-  uses: p-mazhnik/bitrise-run-build@v1
+  uses: p-mazhnik/bitrise-run-build@v2
   with:
     bitrise-app-slug: bitrise-app-id
     bitrise-build-trigger-token: ${{ secrets.BITRISE_BUILD_TOKEN }}
@@ -170,7 +170,7 @@ defined in the `env:` list to Bitrise.
 
 ```yaml
 - name: Run Bitrise build
-  uses: p-mazhnik/bitrise-run-build@v1
+  uses: p-mazhnik/bitrise-run-build@v2
   with:
     bitrise-app-slug: bitrise-app-id
     bitrise-workflow: primary
@@ -188,7 +188,7 @@ To run Bitrise workflow associated with another repo:
 
 ```yaml
 - name: Run Bitrise workflow associated with another repo
-  uses: p-mazhnik/bitrise-run-build@v1
+  uses: p-mazhnik/bitrise-run-build@v2
   with:
     bitrise-app-slug: bitrise-app-id-2
     bitrise-workflow: primary
@@ -201,7 +201,7 @@ To run Bitrise pipeline:
 
 ```yaml
 - name: Run Bitrise pipeline
-  uses: p-mazhnik/bitrise-run-build@v1
+  uses: p-mazhnik/bitrise-run-build@v2
   with:
     bitrise-app-slug: bitrise-app-id-2
     bitrise-pipeline: primary
