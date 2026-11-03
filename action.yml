@@ -64,5 +64,5 @@ outputs:
   bitrise-build-url:
     description: 'The Bitrise Build url for this build.'
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
