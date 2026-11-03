@@ -4,6 +4,11 @@
     "noEmit": true,
     "rootDir": "."
   },
-  "include": ["src/**/*.ts", "__tests__/**/*.ts", "vitest.config.mts"],
+  "include": [
+    "src/**/*.ts",
+    "__tests__/**/*.ts",
+    "vitest.config.mts",
+    "scripts/**/*.mts"
+  ],
   "exclude": ["node_modules", "dist", "coverage"]
 }

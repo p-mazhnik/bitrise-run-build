@@ -24,30 +24,31 @@
     "format:write": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",
-    "build": "ncc build src/index.ts -o dist",
-    "package": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "build": "node scripts/build.mts",
+    "package": "npm run build -- --sourcemap",
     "package:watch": "npm run build -- --watch",
     "test": "vitest run",
-    "all": "npm run check && npm run typecheck && npm run ci-test && npm run package",
+    "all": "npm run check && npm run typecheck && npm run ci-test && npm run package && npm run test:bundle",
     "typecheck": "tsc --project tsconfig.check.json",
     "check": "biome ci .",
     "check:write": "biome check --write .",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:bundle": "node scripts/check-bundle.mts"
   },
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^2.0.3",
-    "@actions/github": "^8.0.1",
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1",
     "axios": "^1.21.0",
     "axios-retry": "^4.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.4",
     "@types/node": "^24.19.2",
-    "@vercel/ncc": "^0.45.0",
     "@vitest/coverage-v8": "5.1.0",
-    "typescript": "^5.9.3",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "5.1.0"
   }

@@ -233,12 +233,19 @@ Use the Node version in `.node-version`, then install dependencies with
 
 - `npm run check`: check lint rules, formatting, and import order with Biome.
 - `npm run check:write`: apply Biome's safe fixes and formatting.
-- `npm run typecheck`: type-check the action, tests, and Vitest configuration.
+- `npm run typecheck`: type-check the action, tests, scripts, and Vitest
+  configuration.
 - `npm test`: run the Vitest tests once.
 - `npm run test:watch`: run tests in watch mode.
 - `npm run ci-test`: run tests with V8 coverage (text, JSON summary, and LCOV).
-- `npm run package`: bundle the action for distribution.
-- `npm run all`: run all checks, coverage tests, and packaging.
+- `npm run package`: bundle the action with esbuild and generate a source map.
+- `npm run test:bundle`: verify the built action starts without `node_modules`.
+- `npm run all`: run all checks, coverage tests, packaging, and the bundle
+  check.
+
+TypeScript 7 checks types separately from esbuild, which produces the bundle at
+`dist/index.js`. The build target is derived from the Node major version in
+`.node-version`.
 
 Biome also formats Markdown and YAML files. Build output and coverage reports
 are ignored, and the npm lockfile is maintained by npm.
