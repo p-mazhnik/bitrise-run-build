@@ -41,3 +41,9 @@ jobs:
       - name: Test
         id: npm-ci-test
         run: npm run ci-test
+
+      - name: Build Action
+        run: npm run build
+
+      - name: Test Bundle
+        run: npm run test:bundle
