@@ -233,7 +233,8 @@ Use the Node version in `.node-version`, then install dependencies with
 
 - `npm run check`: check lint rules, formatting, and import order with Biome.
 - `npm run check:write`: apply Biome's safe fixes and formatting.
-- `npm run typecheck`: type-check the action, tests, and Vitest configuration.
+- `npm run typecheck`: type-check the action, tests, scripts, and Vitest
+  configuration.
 - `npm test`: run the Vitest tests once.
 - `npm run test:watch`: run tests in watch mode.
 - `npm run ci-test`: run tests with V8 coverage (text, JSON summary, and LCOV).

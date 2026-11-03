@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import type { BuildOptions } from 'esbuild'
 import { build, context } from 'esbuild'
 
 const nodeMajor = readFileSync(
@@ -18,7 +19,7 @@ const options = {
   outfile: 'dist/index.js',
   sourcemap: args.includes('--sourcemap'),
   logLevel: 'info'
-}
+} satisfies BuildOptions
 
 if (args.includes('--watch')) {
   const watcher = await context(options)

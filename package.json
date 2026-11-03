@@ -24,7 +24,7 @@
     "format:write": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/build.mts",
     "package": "npm run build -- --sourcemap",
     "package:watch": "npm run build -- --watch",
     "test": "vitest run",
@@ -34,7 +34,7 @@
     "check:write": "biome check --write .",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:bundle": "node scripts/check-bundle.mjs"
+    "test:bundle": "node scripts/check-bundle.mts"
   },
   "license": "MIT",
   "dependencies": {
