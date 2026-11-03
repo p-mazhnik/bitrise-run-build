@@ -1,9 +1,9 @@
-import axios from 'axios'
+import { create } from 'axios'
 import type { AxiosInstance } from 'axios'
 import axiosRetry, { exponentialDelay } from 'axios-retry'
 
 export const createClient = ({ token }: { token: string }): AxiosInstance => {
-  const client = axios.create({
+  const client = create({
     baseURL: 'https://api.bitrise.io/v0.1',
     headers: { Authorization: token }
   })
