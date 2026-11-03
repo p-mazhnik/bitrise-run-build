@@ -1,16 +1,16 @@
 import * as core from '@actions/core'
-import { createClient } from './bitrise/client'
+import type { AxiosInstance } from 'axios'
+import { AxiosError } from 'axios'
+import { getAppDetails } from './bitrise/app'
 import {
   abortBuild,
-  triggerBuildWithBuildToken,
-  triggerBuild
+  triggerBuild,
+  triggerBuildWithBuildToken
 } from './bitrise/build'
-import type { AxiosInstance } from 'axios'
+import { createClient } from './bitrise/client'
 import { createBuildOptions, getActorUsername } from './bitrise/options'
-import { waitForBuildEndTime } from './listen'
 import type { BitriseAppDetails, TriggeredBuildDetails } from './bitrise/types'
-import { getAppDetails } from './bitrise/app'
-import { AxiosError } from 'axios'
+import { waitForBuildEndTime } from './listen'
 
 export async function run() {
   const shouldListen = core.getBooleanInput('listen', { required: false })

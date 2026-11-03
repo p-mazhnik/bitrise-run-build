@@ -16,7 +16,6 @@ This action offers following inputs that you can use to configure its behavior.
 
 1. **bitrise-app-slug** (required) : A unique ID of Bitrise application. To find
    the slug:
-
    - Open Bitrise CI and select your project.
    - Once on the project's page, go to your browser's address bar.  
      The URL will look like this:
@@ -37,14 +36,16 @@ This action offers following inputs that you can use to configure its behavior.
    only trigger the build.
 
 1. **bitrise-token** (required if `listen` is `true` or
-   `bitrise-build-trigger-token` is not provided) : User-generated [personal
-   access token][bitrise-pat] or [Workspace API
+   `bitrise-build-trigger-token` is not provided) : User-generated
+   [personal
+   access token][bitrise-pat]
+   or
+   [Workspace API
    token][bitrise-workspace-token].  
    Make sure token has correct permissions to run builds and view their logs.
 
 1. **bitrise-build-trigger-token** (required if `bitrise-token` is not provided
    and `listen` is `false`) : Bitrise Build trigger token. To find the token:
-
    - Open your app on Bitrise.
    - On the main page of the app, click on the App Settings icon
    - Select **Integrations**
@@ -135,7 +136,8 @@ can override Bitrise default envs (like `GIT_REPOSITORY_URL`) using
 ### Examples
 
 These examples show how you can define a step in a workflow job. For more
-information about GitHub Actions workflow syntax, see the [GitHub
+information about GitHub Actions workflow syntax, see the
+[GitHub
 docs][github workflow syntax].
 
 ```yaml
@@ -223,6 +225,24 @@ This action was inspired by the following projects:
 - [AWS CodeBuild Run Build for GitHub Actions](https://github.com/aws-actions/aws-codebuild-run-build/)
 - [Bitrise JS client](https://github.com/lifeomic/bitrise/)
 - [Bitrise Webhooks](https://github.com/bitrise-io/bitrise-webhooks/)
+
+## Development
+
+Use the Node version in `.node-version`, then install dependencies with
+`npm ci`.
+
+- `npm run check`: check lint rules, formatting, and import order with Biome.
+- `npm run check:write`: apply Biome's safe fixes and formatting.
+- `npm run typecheck`: type-check the action, tests, and Vitest configuration.
+- `npm test`: run the Vitest tests once.
+- `npm run test:watch`: run tests in watch mode.
+- `npm run ci-test`: run tests with V8 coverage (text, JSON summary, and LCOV).
+- `npm run package`: bundle the action for distribution.
+- `npm run all`: run all checks, coverage tests, and packaging.
+
+Biome also formats Markdown and YAML files. Build output and coverage reports
+are ignored, and the npm lockfile is maintained by npm.
+
 
 ## License
 

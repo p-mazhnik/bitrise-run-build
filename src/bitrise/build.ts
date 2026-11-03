@@ -1,3 +1,5 @@
+import type { AxiosInstance } from 'axios'
+import axios from 'axios'
 import type {
   AbortOptions,
   AbortResponse,
@@ -5,8 +7,6 @@ import type {
   BuildDescription,
   TriggeredBuildDetails
 } from './types'
-import type { AxiosInstance } from 'axios'
-import axios from 'axios'
 
 export const abortBuild = async (
   client: AxiosInstance,
